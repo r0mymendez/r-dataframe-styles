@@ -38,6 +38,7 @@ The functions employed in the code in this repository facilitate the highlightin
 # 🚀 R Code
 
 If you wish to review the code, you can explore this [R notebook](https://r0mymendez.github.io/r-dataframe-styles/) 
+Feel free to check it out and give it a star if you find it helpful! ⭐️
 
 ---
 <br>
