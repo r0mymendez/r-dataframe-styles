@@ -1,0 +1,856 @@
+---
+title: "Transform your R Dataframes: Styles, 🎨 Colors, and 😎 Emojis "
+description: |
+  In the following article, we will explore a method to add colors and styles to R DataFrames.
+categories:
+  - R
+  - Data
+  - DataViz
+preview: "preview.jpg"
+twitter:
+  site: "@r0mymendez"
+  creator: "@r0mymendez"
+author:
+  - name: Romina Mendez
+    url: https://example.com/norajones
+date: 2024-01-14
+output:
+  distill::distill_article:
+    self_contained: yes
+    toc: yes
+editor_options: 
+  markdown: 
+    wrap: sentence
+draft: true
+---
+
+![](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support%20my%20work-FFDD00?style=flat&labelColor=101010&logo=buy-me-a-coffee&logoColor=white){width="40%"}
+
+A few weeks ago I wrote an article about [`pandas dataframes`](https://dev.to/r0mymendez/transform-your-pandas-dataframes-styles-colors-and-emojis-2cnh) and how to assign styles, but I received messages about how to do it in R (my first love ❤️ in languages with data) and so I decided to rewrite the article using R libraries.
+
+So in the next section of this article, we will explore a method to add 🎨colors and 🖌️styles in R DataFrames.
+We will focus on the application of colors and emojis, using approaches similar to the popular conditional formatting commonly used in pivot tables within spreadsheets.
+Through this strategy, we aim to improve the presentation of our data, making the exploration and understanding of the information not only informative but also visually attractive.
+
+------------------------------------------------------------------------
+
+# What libraries can I use to style my R dataframes?
+
+The R libraries used to create this article are as follows:
+
+![](libraries-R.png)
+
+1.  **🔍 tidyverse**: Among the best, it integrates various R libraries for data manipulation, graphics, and analysis, promoting clear and efficient code.
+
+2.  **📝** **knitr**: Automates the generation of dynamic reports.
+
+3.  **📝 kableExtra**: An additional extension that enhances table presentation in R Markdown documents with extra formatting options.
+
+4.  📄 **reactablefrmtr**: Incorporates functions to craft interactive and flexible tables in R, featuring filtering, sorting, and search functionalities.
+
+5.  **✏️** **htmltools**: Offers functions to build and manipulate HTML objects in R.
+
+6.  📄 **formattable**: Equipped with functions for formatting and customizing tables in R.
+
+7.  📄 **flextable**: Another library enabling the creation of flexible and customizable tables in R, with advanced formatting options for documents and presentations.
+
+8.  **📊 ggplot2**: Among the most popular R visualization libraries, it produces appealing and comprehensible graphs.
+
+9.  🎨 **viridis:** A R library for creating visually appealing color maps
+
+These libraries empowered me to employ functions for generating HTML-style representations of DataFrames.
+This capability enables customization of DataFrame visual appearance during viewing.
+
+The functions employed in this article facilitate the highlighting, coloring, and formatting of cells based on specific conditions.
+This makes it effortless to visually identify patterns and trends within datasets.
+
+![](dataframe-r.png)
+
+Next we have the code with we are going to create a pivot table using a set of data and from this you will begin to give it different styles and conditional formats such as can be seen in the previous image.
+
+------------------------------------------------------------------------
+
+## 🟣 Pivot Tables
+
+> The **pivot table** is a tabular data structure that provides a summarized overview of information from another table, organizing the data based on one variable and displaying values associated with another variable.
+> In this specific scenario, the pivot table organizes the data according to the 'smoker' column and presents the total sum of tips, categorized by the days on which clients consume in the restaurant
+
+------------------------------------------------------------------------
+
+![](pivot_tables.png)
+
+### Example
+
+The following example shows the `pivot_table` method with the 'tips' DataFrame
+
+```{r}
+library(reshape2)
+library(tidyverse)
+
+data = tips
+data_pivot <- data %>%
+  group_by(smoker, day) %>%
+  summarise(total_bill = sum(total_bill), .groups = 'drop') %>%
+  pivot_wider(names_from = day, values_from = total_bill)
+
+data_pivot
+
+```
+
+# 🟣 Dataframe: Apple Store apps
+
+In this analysis, we will use the **'🍎 Apple Store apps'** DataFrame to explore the creation of pivot tables and customization of table styles.
+This dataset provides detailed insights into Apple App Store applications, covering aspects from app names to specifics like size, price, and ratings.
+Our objective is to efficiently break down the information while applying styles that enhance the presentation and comprehension of data effectively.
+
+The dataset was downloaded from [Kaggle](https://www.kaggle.com/ramamet4/app-store-apple-data-set-10k-apps) and it contains more than 7000 Apple iOS mobile application details.
+It is important to note that the data was collected in July 2017.
+
+### Data Schema overview
+
++------------------+---------------------------------------------------------------------------------+
+| column_name      | column description                                                              |
++==================+=================================================================================+
+| track_name       | the column contains the name of the app.                                        |
++------------------+---------------------------------------------------------------------------------+
+| size_bytes       | the column contains the size of the app in bytes.                               |
++------------------+---------------------------------------------------------------------------------+
+| currency         | the column contains the currency type.                                          |
++------------------+---------------------------------------------------------------------------------+
+| price            | the column contains the price of the app.                                       |
++------------------+---------------------------------------------------------------------------------+
+| rating_count_tot | the column contains the total number of ratings.                                |
++------------------+---------------------------------------------------------------------------------+
+| rating_count_ver | the column contains the number of ratings for the current version of the app.   |
++------------------+---------------------------------------------------------------------------------+
+| user_rating      | the column contains the average user rating for the app.                        |
++------------------+---------------------------------------------------------------------------------+
+| user_rating_ver  | the column contains the average user rating for the current version of the app. |
++------------------+---------------------------------------------------------------------------------+
+| ver              | the column contains the current version of the app.                             |
++------------------+---------------------------------------------------------------------------------+
+| cont_rating      | the column contains the content rating.                                         |
++------------------+---------------------------------------------------------------------------------+
+| prime_genre      | the column contains the primary genre.                                          |
++------------------+---------------------------------------------------------------------------------+
+| sup_devices.num  | the column contains the number of supported devices.                            |
++------------------+---------------------------------------------------------------------------------+
+| ipadSc_urls.num  | the column contains the number of screenshots showed for display.               |
++------------------+---------------------------------------------------------------------------------+
+| lang.num         | the column contains the number of supported languages.                          |
++------------------+---------------------------------------------------------------------------------+
+| vpp_lic          | the column contains the Vpp Device Based Licensing Enabled.                     |
++------------------+---------------------------------------------------------------------------------+
+
+------------------------------------------------------------------------
+
+## 🟣 Create Dataframe
+
+In the following code chunk, we will create a DataFrame by reading the CSV file.
+
+```{r}
+print(paste0("tidyverse version: ",packageVersion("tidyverse")[1]))
+
+```
+
+```{r}
+# Create a dataframe from a csv file
+# You can download the file from the following link https://github.com/r0mymendez/pandas-styles
+path = 'https://raw.githubusercontent.com/r0mymendez/pandas-styles/main/data/AppleStore.csv'
+data = read_delim(path , delim = ";")
+
+```
+
+## 🟣 Pivot Table
+
+In the next step, our goal is to generate a dynamic table from a **Dataframe**, in which the top 15 genres with the largest number of applications are filtered.
+
+```{r}
+# Pivot table
+
+# filter the data to keep only the top 15 genres
+top_genre = data %>%
+  group_by(prime_genre) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  arrange(desc(count)) %>%
+  head(n = 15) %>%
+  pull(prime_genre)
+
+
+tmp = data %>%
+  filter(prime_genre %in% top_genre) %>%
+  select(prime_genre, user_rating, price)
+
+
+# create a new column with the rating rounded to the nearest integer
+tmp$user_rating = paste0("rating_", as.character(trunc(tmp$user_rating)))
+
+
+# create a pivot table
+tmp_pivot <- tmp %>%
+  group_by(prime_genre, user_rating) %>%
+  summarise(price = mean(price, na.rm = TRUE), .groups = 'drop') %>%
+  pivot_wider(names_from = user_rating, values_from = price, values_fill = 0) %>%
+  mutate(across(where(is.numeric), ~round(., 2)))
+
+
+# print the pivot table
+tmp_pivot
+
+```
+
+------------------------------------------------------------------------
+
+## 🟣 Styles with R libraries
+
+Now we will explore the functions of the aforementioned libraries that will allow us to improve the visual presentation of DataFrames.
+This functionality provides us with different options to modify the appearance of the data, allowing us to customize aspects such as:
+
+-   **Highlighting:** Emphasize specific rows, columns, or values.
+-   **Formatting:** Adjust the format of the displayed values, including precision and alignment.
+-   **Bar Charts:** Represent data with horizontal or vertical bar charts within cells.
+
+------------------------------------------------------------------------
+
+### 🎨 Styling: Setting Background Color for Headers
+
+In this section, we will apply styles to both the titles and the table.
+Therefore we use background colors to highlight the headers and the rest of the table.
+
+```{r}
+library(knitr)
+library(kableExtra)
+
+kable(tmp_pivot, "html") %>%
+  kable_styling("striped", full_width = F) %>%
+  row_spec(0, background = "#5E17EB", color = "white")
+```
+
+### 🎨 Style: Setting the background color for all the rows
+
+In following code snippet illustrates how to set a custom background color for all the rows in our DataFrame.
+
+```{r}
+kable(tmp_pivot, "html") %>%
+  kable_styling("striped", full_width = F)  %>%
+  row_spec(0, background = "#5E17EB", color = "white") %>%
+  column_spec(1, column=1:ncol(tmp_pivot) ,background = "#ECE3FF", color = "black")
+
+```
+
+------------------------------------------------------------------------
+
+### 🎨 Style: Setting the background color for a particular cell
+
+In following code snippet illustrates how to set a custom background color for a particular cell in our DataFrame using pandas styling.
+
+```{r}
+
+value = 4
+
+tmp_pivot %>%
+  mutate(
+    rating_4 = cell_spec(rating_4, "html", 
+                    background = if_else(tmp_pivot$rating_4>value, "#FD636B", "#ECE3FF"),
+                    color = if_else(tmp_pivot$rating_4>value, "white", "black")
+    )
+  ) %>%
+  kable(format = "html", escape = F) %>%
+  kable_styling("striped", full_width = FALSE) %>%
+  row_spec(0, background = "#5E17EB", color = "white") %>%
+  column_spec(1:ncol(tmp_pivot), background = "#ECE3FF", color = "black")
+
+
+```
+
+### 🎨 Style: Setting the background color for max/min values in the dataframe
+
+Now, we will focus on highlighting the maximum and minimum values in our DataFrame.
+For this reason, we will assign distinctive background colors to these extreme values, facilitating a quicker and more intuitive understanding of the dataset.
+The code snippet below demonstrates how to implement this stylistic enhancement.
+
+```{r}
+
+rating_columns <- grep("^rating", names(tmp_pivot), value = TRUE)
+max_value <- max(unlist(tmp_pivot %>% select(rating_columns), use.names = FALSE))
+min_value <- min(unlist(tmp_pivot %>% select(rating_columns), use.names = FALSE))
+
+# The next function to apply specific formatting and preserve the original
+format_spec <- function(x) {
+  if_else(x == max_value, sprintf("%.2f", x),
+          if_else(x == min_value, sprintf("%.2f", x),
+                  sprintf("%.2f", x)))
+}
+
+tmp_pivot %>%
+  mutate(
+    across(rating_columns, 
+           ~ cell_spec(format_spec(.x),
+          "html", 
+           background = if_else(. == max_value, "#3BE8B0",
+                                if_else(. == min_value, "#FF66C4", "#ECE3FF")),
+           bold = if_else(. == max_value, TRUE,if_else(. == min_value, TRUE, FALSE))
+                )
+         )
+  ) %>%
+  kable(format = "html", escape = F) %>%
+  kable_styling("striped", full_width = FALSE) %>%
+  row_spec(0, background = "#5E17EB", color = "white") %>%
+  column_spec(1:ncol(tmp_pivot), background = "#ECE3FF", color = "black")
+
+
+```
+
+### 🎨 Style: Color Background Gradients
+
+In the upcoming section, we will delve into the concept of color maps, representing a spectrum of colors arranged in a gradient.
+A colormap, essentially a palette of colors, consists of distinctive denominations, with the most popular ones being **['viridis,' 'magma,' 'inferno,' 'plasma', 'cividis']**.
+
+The primary objective behind creating these color spectrums is to enhance the visual representation of data.
+Each color in the gradient carries specific nuances, contributing to a more nuanced data visualization experience.
+
+```{r}
+
+library(viridisLite)  
+library(viridis)
+library(unikn)  # load package
+seecol(pal = pal_unikn)
+
+# Reference of the following code: https://bookdown.org/hneth/ds4psy/D-4-apx-colors-pkgs.html
+n <- 10  # number of colors
+
+# define 5 different color scales (n colors each):
+v1 <- viridis(n)
+v2 <- magma(n)
+v3 <- inferno(n)
+v4 <- plasma(n)
+v5 <- cividis(n)
+
+# See and compare color scales:
+seecol(list(v1, v2, v3, v4, v5), 
+       col_brd = "white", lwd_brd = 4, 
+       title = "Various viridis color palettes (n = 10)",
+       pal_names = c("v1: viridis", "v2: magma", "v3: inferno", "v4: plasma",  "v5: cividis"))
+
+
+```
+
+#### Viridis palette
+
+> Now, we will apply a color gradient to our pivot table, allowing you to observe how it is colored using the Viridis palette.
+> In this context, lighter colors signify larger values within the distribution, while darker shades correspond to smaller values in the distribution.
+> This approach provides a visual representation that intuitively conveys the magnitude of the data, making it easier to discern patterns and variations across the dataset.
+
+```{r , out.width="10%", out.height="10%"}
+
+library(ggplot2)
+# Número de tonos (lut)
+lut <- 10
+
+# Crear un data frame con una variable continua
+data <- data.frame(x = seq(1, lut))
+
+options(repr.plot.width = 5, repr.plot.height =2) 
+
+# Crear un gráfico de barras con colores de la paleta "viridis"
+ggplot(data, aes(x = x, y = 0.2, fill = as.factor(x))) +
+  geom_tile() +
+  scale_fill_manual(values = viridis(lut, option = "D")) +
+  labs(x = "Índice", y = "") +
+  theme_void() +
+  theme(legend.position = "none") 
+
+
+```
+
+```{r}
+
+# Calculate maximum and minimum values
+max_value <- max(unlist(tmp_pivot %>% select(rating_columns), use.names = FALSE))
+min_value <- min(unlist(tmp_pivot %>% select(rating_columns), use.names = FALSE))
+
+# Define the number of cuts for the "viridis" palette
+num_cuts <-nrow(tmp_pivot)
+
+xc <- seq(min_value, max_value, length.out = num_cuts)
+pal <- viridis(num_cuts)
+
+# Apply color gradients to each cell with viridis 
+styled_table <- map(tmp_pivot, function(col) {
+  if (is.numeric(col)) {
+    cell_spec( format_spec(col),
+               "html", 
+               background = pal[cut(col, breaks = xc, include.lowest = TRUE)])
+  } else {
+    cell_spec(col, "html")
+  }
+}) %>%
+  as.data.frame() %>%
+  kable(format = "html", escape = F)  %>%
+  kable_styling("striped", full_width = FALSE)  %>%
+  row_spec(0, background = "#440154FF", color = "white") %>%
+  column_spec(2:ncol(tmp_pivot), color = "white") %>%
+  column_spec(1:1, background = "#ECE3FF") 
+
+styled_table
+```
+
+### 🎨 Style: Color Background by columns
+
+In the next code chunk, we will enhance the visual representation of our pivot table by introducing distinct color backgrounds to specific columns.
+This technique aids in better highlighting and categorizing data, making it easier to draw insights from the table.
+
+```{r}
+
+tmp_pivot%>%
+  kable(format = "html", escape = F)  %>%
+  kable_styling("striped", full_width = FALSE)  %>%
+  column_spec(2:3, background = "#FFCFC9", color = "black") %>%
+  column_spec(4:5, background = "#FFF1B0", color = "black") %>%
+  column_spec(6:7, background = "#BEEAE5", color = "black")%>%
+  row_spec(0, background = "#440154FF", color = "white") %>%
+  column_spec(1:1, background = "#ECE3FF") 
+
+
+
+```
+
+### 🎨 Style: Color Background by rows
+
+In the next code chunk, we will enhance the visual representation of our pivot table by introducing distinct color backgrounds by rows.
+
+```{r}
+
+n <- nrow(tmp_pivot)
+row_0 <-c()
+row_1 <-c()
+
+
+for (item in seq(1, n)) {
+  if (item %% 2 == 0) {
+    row_0 <- c(row_0,item)
+  } else {
+    row_1 <- c(row_1,item)
+  }
+}
+
+ tmp_pivot %>%
+  kable(format = "html", escape = F) %>%
+  kable_styling("striped", full_width = FALSE) %>%
+  row_spec(row_0, background = "#ECE3FF", color = "black") %>%
+  row_spec(row_1, background = "#ffdefa", color = "black")%>%
+  row_spec(0, background = "#440154FF", color = "white") 
+
+
+```
+
+------------------------------------------------------------------------
+
+### 🎨 Style: Color Bar
+
+In this section, we will implement the style.bar function to introduce a dynamic color bar into our DataFrame.
+The color bar provides a visual representation of data values, assigning varying colors to different data ranges.
+
+```{r}
+library(htmlwidgets)
+library(htmltools)
+library(formattable)
+
+formattable(tmp_pivot, list(
+  prime_genre = formatter("span", style = ~ style(background = "#ECE3FF", font.weight = "bold")),
+  rating_0 = color_bar("#FFCFC9"),
+  rating_1 = color_bar("#FFCFC9"),
+  rating_2 = color_bar("#FFF1B0"),
+  rating_3 = color_bar("#FFF1B0"),
+  rating_4 = color_bar("#BEEAE5"),
+  rating_5 = color_bar("#BEEAE5")
+)) %>%
+  as.htmlwidget() %>%
+  prependContent(tags$style("th { padding: 0px !important; background: #5E17EB; color: white }")) %>%
+  prependContent(tags$style("table tr td:first-child { background-color: #ECE3FF }")) 
+
+```
+
+------------------------------------------------------------------------
+
+# 🎨 Style: Image in Columns
+
+In this section, we explore the enhancement of data representation by adding an image to an additional column.
+This approach provides an alternative method to elevate the visual impact of the data being presented.
+These images can serve as icons, represent brands, or convey additional visual elements to captivate and engage the audience.
+
+```{r}
+library(flextable)
+
+flextable(tmp_pivot%>%
+              head(5)%>%
+              mutate(id=0:4,
+                     id=paste0('img/img_',id,'.png'))%>%
+              select(c('id',names(tmp_pivot)))
+         ) %>%
+  colformat_image(j = "id", width = .5, height = 0.5) %>%
+  bg(part = "header", bg = "#5E17EB", j =  c('id',names(tmp_pivot)) ) %>% 
+  color(color = "white", part = "header") %>% 
+  bg(part = "body", bg = "#ECE3FF")
+```
+
+------------------------------------------------------------------------
+
+# 🎨 Style: Icons and Charts derived from column comparisons
+
+In this section, we'll explore a creative approach using icons and charts to visually represent comparisons between two or more columns of data.
+
+```{r}
+
+# Define the column names
+column_names <- paste0("rating_", 0:5)
+
+# Apply the formatter function to each column
+formatters_list <- lapply(column_names, function(col) {
+  prev_col <- paste0("rating_", as.numeric(str_extract(col, "\\d+")) - 1)
+  if (col == "rating_0") {
+    formatter(
+      "span",
+      style = ~ formattable::style("font.weight" = "bold"),
+      ~icontext("arrow-right", tmp_pivot[[col]])
+    )
+  } else {
+    formatter(
+      "span",
+      style = ~ formattable::style(color = ifelse(tmp_pivot[[col]] > tmp_pivot[[prev_col]], 
+                                                  "green", "red"),
+                      "font.weight" = "bold"),
+      ~icontext(ifelse(tmp_pivot[[col]] > tmp_pivot[[prev_col]], "arrow-up", "arrow-down"), tmp_pivot[[col]])
+    )
+  }
+})
+
+# Create a named list for formattable
+formatters_list <- setNames(formatters_list, column_names)
+
+# Apply formattable and convert to htmlwidget
+formattable(tmp_pivot, formatters_list) %>%
+  as.htmlwidget() %>%
+  prependContent(
+    tags$style("th { padding: 0px !important; background: #5E17EB; color: white }")) %>%
+  prependContent(
+    tags$style("table tr td:first-child { background-color: #ECE3FF }"))
+
+```
+
+------------------------------------------------------------------------
+
+```{r}
+# Get the names of columns that start with 'rating'
+column_str = names(tmp_pivot[startsWith(names(tmp_pivot), "rating")])
+
+# Get the names of columns that we will expect to have
+expected_columns = c(names(tmp_pivot), 'plot_line', 'plot_bar')
+
+# Create the new data frame with two new columns with the charts representation
+tmp_nest <- tmp_pivot %>%
+  nest(values = c(column_str), values_1=c(column_str)) %>%
+  mutate( values = map(values, ~ as.numeric(.x) ) ) %>%
+  unnest(values_1)%>%
+  mutate(
+    plot_line = map_chr(values,
+                        ~ as.character(htmltools::as.tags(sparkline::sparkline(.x, 
+                                                               type = "line",
+                                                               lineColor='#5E17EB',
+                                                               fillColor='#5E17EB'))
+                                       )
+                        ),
+     plot_bar = map_chr(values, 
+                       ~ as.character(htmltools::as.tags(sparkline::sparkline(.x,
+                        type = "bar",
+                        barColor = '#5E17EB'))
+                        )
+                       )
+  )%>%
+  select(expected_columns)
+
+# Print the table with html format
+out = as.htmlwidget(formattable(tmp_nest))
+out$dependencies = c(out$dependencies, htmlwidgets:::widget_dependencies("sparkline", "sparkline"))
+out %>%
+  prependContent(tags$style("th { padding: 0px !important; background: #5E17EB; color: white }")) %>%
+  prependContent(tags$style("table tr td:first-child { background-color: #ECE3FF }"))
+
+```
+
+```{r}
+library(reactablefmtr)
+
+reactable(tmp_pivot%>%head(10),
+          defaultColDef = colDef(
+            cell = data_bars(
+              tmp_pivot, 
+              box_shadow = TRUE, 
+              round_edges = TRUE,
+              text_position = "outside-base",
+              fill_color = c("#5E17EB", "#ECE3FF"),
+              background = "#e5e5e5",
+              fill_gradient = TRUE
+            ),
+            style = list(
+              #backgroundColor = "#ECE3FF",
+              color = "black",
+              fontSize = "14px"
+            ),
+            headerStyle = list(
+              backgroundColor = "#5E17EB",
+              color = "white",
+              fontFamily = "Comic Sans MS",
+              fontSize = "14px"
+            )
+          )
+)
+
+
+
+```
+
+```{r}
+
+reactable(
+  tmp_pivot%>%head(5)%>%select(-c('rating_0')),
+  defaultColDef = colDef(
+    align = 'center',
+    cell = bubble_grid(
+      data = tmp_pivot%>%head(5),
+      shape = "circles",
+      number_fmt = scales::comma,
+      colors = c("#D6B1FB","#C687FC","#A060FF"),
+      brighten_text=TRUE,
+      text_size=14,
+      box_shadow = TRUE,
+      opacity = 0.6
+    ),
+    headerStyle = list(
+      backgroundColor = "#5E17EB",
+      color = "white",
+      fontFamily = "Comic Sans MS",
+      fontSize = "14px"
+    )
+  ),
+  columns = list(
+    prime_genre = colDef(
+      style = list(
+        fontSize = "14px"
+      )
+    )
+  )
+)%>% 
+  add_title(
+    title = reactablefmtr::html("🍎 Apple Store apps"),
+    margin = reactablefmtr::margin(t=0,r=0,b=5,l=0)
+    ) 
+
+  
+```
+
+```{r}
+
+tmp_pivot_5 = tmp_pivot%>%head(5)
+
+reactable(
+  tmp_pivot_5%>%select(-c('rating_0')),
+  defaultColDef = colDef(
+    align = 'center',
+    cell = bubble_grid(
+      data = tmp_pivot_5,
+      shape = "squares",
+      number_fmt = scales::comma,
+      colors = c("#D6B1FB","#C687FC","#A060FF"),
+      brighten_text=TRUE,
+      text_size=14,
+      box_shadow = TRUE,
+      opacity = 0.6,
+    ),
+    headerStyle = list(
+      backgroundColor = "#5E17EB",
+      color = "white",
+      fontFamily = "Comic Sans MS",
+      fontSize = "14px"
+    )
+  ),
+columns = list(
+    prime_genre = colDef(
+      minWidth = 175,
+      cell = pill_buttons(data = tmp_pivot_5$prime_genre, box_shadow = TRUE,colors="#A060FF",text_color='white'),
+      style = list(
+        fontSize = "14px"
+      )
+    )
+  )
+) %>% 
+  add_title(
+    title = reactablefmtr::html("🍎 Apple Store apps"),
+    margin = reactablefmtr::margin(t=0,r=0,b=5,l=0)
+  ) 
+
+```
+
+```{r}
+
+reactable(
+  tmp_pivot%>%head(5)%>%select(-c('rating_0')),,
+  defaultColDef = colDef(
+    align = 'left',
+    cell = gauge_chart(
+      data = tmp_pivot_5,
+      number_fmt = scales::comma,
+      fill_color="#5E17EB",
+      background="#e5e5e5",
+    ),
+    headerStyle = list(
+      backgroundColor = "#5E17EB",
+      color = "white",
+      fontFamily = "Comic Sans MS",
+      fontSize = "14px"
+    )
+  ),
+  columns = list(
+    prime_genre = colDef(
+      minWidth = 175,
+      header = htmltools::tags$div(
+        "Prime Genre", 
+        style = list(
+          backgroundColor = "#5E17EB",
+          color = "white",
+          fontFamily = "Comic Sans MS",
+          fontSize = "14px"
+        )
+      ),
+      cell = pill_buttons(data = tmp_pivot_5$prime_genre, box_shadow = TRUE,colors="#A060FF",text_color='white'),
+      style = list(
+        fontSize = "14px",
+        fontFamily = "Comic Sans MS"
+      )
+    )
+  )
+) %>% 
+  add_title(
+  title = htmltools::HTML(
+    sprintf("<div style='font-family:Comic Sans MS;'>%s</div>", "🍎 Apple Store apps")
+  ),
+  margin = reactablefmtr::margin(t=0,r=0,b=5,l=0)
+)
+
+
+```
+
+# 🎨 Style: Emoji Representation Based on Percentile Values
+
+In this section, we delve into the creative use of emojis based on percentile values, offering a distinctive approach to elevate data representation.
+By incorporating diverse emojis, we enhance the visual impact of the data.
+Specifically, we employ circles and squads as emojis to bring nuanced expressions to our data points.
+
+If you'd like to view the code for creating this style, it's available in my GitHub repository.
+
+Feel free to check it out and give it a star if you find it helpful!
+⭐️
+
+```{r}
+create_series <- function(row_data, emoji) {
+  if (emoji == 'max') {
+    return(ifelse(row_data == max(row_data), '🟩', '⬜'))
+  } else if (emoji == 'min') {
+    return(ifelse(row_data == min(row_data), '🟥', '⬜'))
+  } else if (emoji == 'min_max') {
+    return(ifelse(row_data == min(row_data), '🟥',
+                  ifelse(row_data == max(row_data), '🟩', '⬜')))
+ }
+}
+```
+
+```{r}
+get_percentiles <- function(row_data, bins=3, emoji='circle') {
+  emoji_labels <- list(
+    'circle' = list('3' = c('🔴', '🟡', '🟢'), 
+                    '4' = c('🔴', '🟠', '🟡', '🟢')),
+    'squad' =  list('3' = c('🟥', '🟨', '🟩'), 
+                   '4' = c('🟥', '🟨', '🟧', '🟩'))
+  )
+  
+  if (emoji %in% c('max', 'min', 'min_max')) {
+    return(create_series(row_data, emoji))
+  } else if (emoji %in% names(emoji_labels) & bins %in% names(emoji_labels[[emoji]])) {
+    labels <- emoji_labels[[emoji]][[as.character(bins)]]
+    return(cut(row_data, breaks=length(labels), labels=labels, ordered_result=FALSE))
+  } else {
+    return(row_data)
+  }
+}
+
+```
+
+```{r}
+get_conditional_table_column <- function(data, bins=3, emoji='circle') {
+  tmp <- data
+  for (column in colnames(data)) {
+    if (is.numeric(data[[column]])) {
+      row_data_emoji <- as.character(get_percentiles(data[[column]], bins, emoji))
+      tmp[[column]] <- paste(format(round(data[[column]], 2), nsmall = 2), row_data_emoji)
+    }
+  }
+  return(tmp)
+}
+
+```
+
+```{r}
+
+get_conditional_table_row <- function(data, bins=3, emoji='circle') {
+  response_values <- list()
+  column_str <- names(data)[sapply(data, is.character)]
+  columns_num <- names(data)[sapply(data, is.numeric)]
+  
+  for (row in 1:nrow(data)) {
+    row_data <- data[row, columns_num]
+    percentil <- get_percentiles(row_data, bins, emoji)
+    row_data <- sapply(round(row_data, 2),format_spec)
+    percentil_values <- paste(row_data, percentil)
+    response_values <- append(response_values, list(percentil_values))
+  }
+  
+  result_df <- data.frame(matrix(unlist(response_values), 
+                                 nrow=length(response_values), byrow=TRUE))
+  
+  names(result_df) <- columns_num
+  result_df <- cbind(data[column_str], result_df)
+  return(result_df)
+}
+
+
+```
+
+```{r}
+# get conditional table by column with 3 bins 
+get_conditional_table_row(data=tmp_pivot%>%head(5),emoji='min_max')
+
+```
+
+```{r}
+# get conditional table by column using the max value
+get_conditional_table_column(data=tmp_pivot_5,emoji='max')
+```
+
+```{r}
+# get conditional table by column using the circle emoji with 4 bins
+get_conditional_table_column(data=tmp_pivot_5,emoji='circle',bins=4)
+```
+
+------------------------------------------------------------------------
+
+# 📚 References
+
+If you want to learn...
+
+-   [Data Science for Psychologists, D.4 Using color packages](https://bookdown.org/hneth/ds4psy/D-4-apx-colors-pkgs.html)
+-   [Using the flextable R package](https://ardata-fr.github.io/flextable-book/index.html)
+-   [Create Awesome HTML Table with knitr::kable and kableExtra](https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html)
+-   [ViridisLite: Documentation](https://github.com/sjmgarnier/viridisLite)
+-   [Introduction to the viridis color maps](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html)
+-   [Formattable: Documentation](https://renkun-ken.github.io/formattable/)
+-   [Reactablefmtr: Documentation](https://kcuilla.github.io/reactablefmtr/)
