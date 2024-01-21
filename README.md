@@ -33,6 +33,11 @@ The functions employed in the code in this repository facilitate the highlightin
 <img src="img/dataframe-r.png" alt="libraries" border="0" width="80%">
 </p>
 
+---
+
+# 🚀 R Code
+
+If you wish to review the code, you can explore this [R notebook](https://r0mymendez.github.io/r-dataframe-styles/) 
 
 ---
 <br>
